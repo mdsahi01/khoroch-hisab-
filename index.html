@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Student Hisab</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827}
+header{background:#111827;color:white;padding:22px 18px 18px;position:sticky;top:0;z-index:5}
+h1{margin:0;font-size:25px}.month{margin-top:5px;opacity:.75}
+main{padding:15px 15px 90px;max-width:700px;margin:auto}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:white;border-radius:14px;padding:15px;box-shadow:0 2px 8px #00000012}.label{font-size:13px;color:#6b7280}.value{font-size:21px;font-weight:bold;margin-top:5px}
+.section{background:white;border-radius:14px;padding:15px;margin-top:12px;box-shadow:0 2px 8px #00000012}
+h2{font-size:18px;margin:0 0 12px}
+button{border:0;border-radius:10px;padding:11px 14px;font-weight:bold;cursor:pointer}
+.primary{background:#111827;color:white}.danger{background:#fee2e2;color:#991b1b}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+input,select{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:9px;margin:5px 0 10px;background:white}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.small{font-size:13px;color:#6b7280}.item{display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:10px 0}
+nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #ddd;padding:8px;display:flex;justify-content:space-around;z-index:6}
+nav button{background:none;color:#374151;font-size:12px}.hidden{display:none}
+.total{font-size:27px;font-weight:bold}.pill{display:inline-block;background:#e5e7eb;padding:4px 8px;border-radius:20px;font-size:12px}
+</style>
+</head>
+<body>
+<header><h1>Student Hisab</h1><div class="month" id="monthName"></div></header>
+<main>
+<section id="home">
+<div class="cards">
+<div class="card"><div class="label">Total Deposit</div><div class="value" id="depositTotal">৳0</div></div>
+<div class="card"><div class="label">Total Expense</div><div class="value" id="expenseTotal">৳0</div></div>
+<div class="card"><div class="label">Savings</div><div class="value" id="savingTotal">৳0</div></div>
+<div class="card"><div class="label">Remaining</div><div class="value" id="remainingTotal">৳0</div></div>
+</div>
+<div class="section"><h2>Quick Add</h2><div class="grid">
+<button class="primary" onclick="show('deposit')">+ Deposit</button>
+<button class="primary" onclick="show('expense')">+ Expense</button>
+<button class="primary" onclick="show('saving')">+ Savings</button>
+<button onclick="show('cigarette')">Cigarettes</button>
+<button onclick="show('tea')">Tea</button><button onclick="show('history')">History</button>
+</div></div>
+<div class="section"><h2>Current Month</h2><div id="summary" class="small"></div></div>
+</section>
+
+<section id="deposit" class="hidden"><div class="section"><h2>Add Deposit</h2>
+<label>Amount (৳)</label><input id="dAmount" type="number" min="0">
+<button class="primary" onclick="addDeposit()">Save Deposit</button></div></section>
+
+<section id="expense" class="hidden"><div class="section"><h2>Add Expense</h2>
+<label>Category</label><select id="eCat"><option>Food</option><option>Transport</option><option>Study</option><option>Shopping</option><option>Rent</option><option>Other</option></select>
+<label>Item</label><input id="eItem" placeholder="e.g. Rice">
+<div class="row"><div><label>Quantity</label><input id="eQty" type="number" value="1" min="1"></div><div><label>Price (৳)</label><input id="ePrice" type="number" min="0"></div></div>
+<button class="primary" onclick="addExpense()">Save Expense</button></div></section>
+
+<section id="saving" class="hidden"><div class="section"><h2>Add Savings</h2>
+<p class="small">Savings are separate from leftover money.</p><label>Amount (৳)</label><input id="sAmount" type="number" min="0">
+<button class="primary" onclick="addSaving()">Save Savings</button></div></section>
+
+<section id="cigarette" class="hidden"><div class="section"><h2>Cigarette Tracker</h2>
+<div class="row"><div><label>Quantity</label><input id="cQty" type="number" min="1" value="1"></div><div><label>Price each (৳)</label><input id="cPrice" type="number" min="0"></div></div>
+<button class="primary" onclick="addCig()">Save Cigarette Record</button><p id="cigInfo"></p>
+<hr><b>Health note</b><p class="small">Smoking increases the risk of serious diseases and nicotine is addictive.</p></div></section>
+
+<section id="tea" class="hidden"><div class="section"><h2>Tea Tracker</h2>
+<div class="row"><div><label>Cups</label><input id="tQty" type="number" min="1" value="1"></div><div><label>Price each (৳)</label><input id="tPrice" type="number" min="0"></div></div>
+<button class="primary" onclick="addTea()">Save Tea Record</button><p id="teaInfo"></p></div></section>
+
+<section id="history" class="hidden"><div class="section"><h2>History</h2><div id="historyList"></div></div>
+<div class="section"><h2>Backup / Restore</h2><button onclick="backup()">Backup JSON</button><input type="file" accept=".json" onchange="restore(event)"><button class="danger" onclick="clearData()">Clear All Data</button></div></section>
+</main>
+
+<nav><button onclick="show('home')">⌂<br>Home</button><button onclick="show('expense')">＋<br>Add</button><button onclick="show('cigarette')">🚬<br>Cigarette</button><button onclick="show('tea')">☕<br>Tea</button><button onclick="show('history')">☷<br>History</button></nav>
+
+<script>
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(()=>{});
+const KEY='studentHisab_v1';
+let data=JSON.parse(localStorage.getItem(KEY)||'{"months":{}}');
+const key=()=>{let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')};
+const monthLabel=()=>new Date().toLocaleString('en-US',{month:'long',year:'numeric'});
+function month(){let k=key();if(!data.months[k])data.months[k]={deposit:0,savings:0,expenses:[],cigarettes:[],tea:[]};return data.months[k]}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
+function money(n){return '৳'+Number(n||0).toLocaleString()}
+function expenseTotal(m){return m.expenses.reduce((a,x)=>a+x.total,0)+m.cigarettes.reduce((a,x)=>a+x.total,0)+m.tea.reduce((a,x)=>a+x.total,0)}
+function addDeposit(){let v=+dAmount.value;if(v>0){month().deposit+=v;dAmount.value='';save();show('home')}}
+function addSaving(){let v=+sAmount.value;if(v>0){month().savings+=v;sAmount.value='';save();show('home')}}
+function addExpense(){let q=+eQty.value,p=+ePrice.value;if(q>0&&p>=0){month().expenses.push({category:eCat.value,item:eItem.value||'Item',qty:q,price:p,total:q*p,date:new Date().toLocaleDateString()});eItem.value='';ePrice.value='';save();show('home')}}
+function addCig(){let q=+cQty.value,p=+cPrice.value;if(q>0&&p>=0){month().cigarettes.push({qty:q,price:p,total:q*p,date:new Date().toLocaleDateString()});save();show('home')}}
+function addTea(){let q=+tQty.value,p=+tPrice.value;if(q>0&&p>=0){month().tea.push({qty:q,price:p,total:q*p,date:new Date().toLocaleDateString()});save();show('home')}}
+function show(id){document.querySelectorAll('main>section').forEach(x=>x.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');window.scrollTo(0,0);render()}
+function render(){let m=month(),e=expenseTotal(m),r=m.deposit-e;monthName.textContent=monthLabel();depositTotal.textContent=money(m.deposit);expenseTotalEl.textContent=money(e);savingTotal.textContent=money(m.savings);remainingTotal.textContent=money(r);summary.textContent=`Expenses: ${money(e)} • Savings: ${money(m.savings)} • Cigarettes: ${m.cigarettes.reduce((a,x)=>a+x.qty,0)} • Tea: ${m.tea.reduce((a,x)=>a+x.qty,0)}`;cigInfo.textContent=`This month: ${m.cigarettes.reduce((a,x)=>a+x.qty,0)} cigarettes • ${money(m.cigarettes.reduce((a,x)=>a+x.total,0))}`;teaInfo.textContent=`This month: ${m.tea.reduce((a,x)=>a+x.qty,0)} cups • ${money(m.tea.reduce((a,x)=>a+x.total,0))}`;historyList.innerHTML=Object.keys(data.months).sort().reverse().map(k=>{let x=data.months[k];return `<div class="item"><span><b>${k}</b><br><span class="small">Deposit ${money(x.deposit)} • Expense ${money(expenseTotal(x))} • Savings ${money(x.savings)}</span></span></div>`}).join('')||'<p class="small">No history yet.</p>'}
+const expenseTotalEl=document.getElementById('expenseTotal');
+function backup(){let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='student-hisab-backup.json';a.click()}
+function restore(ev){let f=ev.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{data=JSON.parse(r.result);save();alert('Backup restored')}catch(e){alert('Invalid backup')}};r.readAsText(f)}
+function clearData(){if(confirm('Delete all Student Hisab data?')){localStorage.removeItem(KEY);location.reload()}}
+render();
+</script>
+</body>
+</html>
